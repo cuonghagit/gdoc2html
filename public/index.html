@@ -171,6 +171,8 @@
     URL.revokeObjectURL(a.href);
   }
 
+  window.downloadHtml = downloadHtml;
+
   // Enter key
   $('url-input').onkeydown = e => { if (e.key === 'Enter') $('fetch-btn').click(); };
 })();
