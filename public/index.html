@@ -143,6 +143,10 @@
       $('result-area').innerHTML = html;
       $('result-area').style.display = '';
 
+      // Store HTML for download
+      window.__gdocHtml = j.html;
+      window.__gdocShortId = j.short_id;
+
     } catch (err) {
       $('error-msg').textContent = String(err);
       $('error-msg').style.display = '';
@@ -153,18 +157,18 @@
     }
   };
 
-  function downloadHtml(shortId) {
-    // Extract HTML from the iframe's srcdoc attribute
-    const iframe = document.getElementById('preview');
-    if (iframe) {
-      const a = document.createElement('a');
-      a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(iframe.srcdoc);
-      a.download = `gdoc2html_${shortId || 'output'}.html`;
-      a.click();
-    } else {
-      // Fallback: re-fetch
-      alert('Load lại trang và Fetch lại để download');
-    }
+  function downloadHtml() {
+    const html = window.__gdocHtml;
+    const shortId = window.__gdocShortId || 'output';
+    if (!html) { alert('Chưa có dữ liệu. Fetch trước đã.'); return; }
+    const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `gdoc2html_${shortId}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
   }
 
   // Enter key
