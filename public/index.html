@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gdoc2html — Google Doc → Clean HTML</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+         max-width: 960px; margin: 20px auto; padding: 0 20px; color: #222;
+         background: #f5f5f5; }
+  h1 { margin: 0 0 4px 0; font-size: 22px; }
+  h1 small { font-size: 13px; color: #666; font-weight: 400; }
+  .container { background: #fff; border: 1px solid #ddd; border-radius: 8px;
+                padding: 20px 24px; margin-bottom: 16px; }
+  label { display: block; font-size: 13px; color: #555; margin: 10px 0 4px; }
+  label .opt { color: #999; font-weight: 400; }
+  input[type=text], input[type=url] { width: 100%; padding: 8px 10px;
+        border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+  input:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15); }
+  .row { display: flex; gap: 12px; align-items: flex-end; margin-top: 14px; }
+  .row > * { flex: 1; }
+  .row > button { flex: 0 0 auto; }
+  button { padding: 8px 20px; border: 1px solid #ccc; background: #fafafa;
+           border-radius: 4px; cursor: pointer; font-size: 13px; }
+  button:hover { background: #eee; }
+  button.primary { background: #1a73e8; color: white; border-color: #1a73e8; }
+  button.primary:hover { background: #1557b0; }
+  button.primary:disabled { background: #99c4f5; border-color: #99c4f5; cursor: not-allowed; }
+  button.danger { background: #d93025; color: white; border-color: #d93025; }
+  button.danger:hover { background: #b3261e; }
+  #log { background: #1e1e1e; color: #d4d4d4; padding: 12px; border-radius: 4px;
+         font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px;
+         max-height: 300px; overflow-y: auto; white-space: pre-wrap; }
+  #log .log-info { color: #6ab04c; }
+  #log .log-warn { color: #f9ca24; }
+  #log .log-error { color: #eb4d4b; }
+  .result-card { background: #d4edda; border: 1px solid #c3e6cb;
+                 padding: 14px 16px; border-radius: 6px; margin-top: 14px; }
+  .result-card .stat { display: inline-block; background: #e8f0fe; border-radius: 4px;
+                        padding: 3px 10px; margin: 2px; font-size: 12px; }
+  .warn-card { background: #fff3cd; border: 1px solid #ffeeba;
+               color: #856404; padding: 14px 16px; border-radius: 6px; margin-top: 14px; }
+  .suggested-names { background: #f8f8f8; border: 1px solid #eee; border-radius: 4px;
+                     padding: 10px; max-height: 200px; overflow-y: auto;
+                     font-family: ui-monospace, monospace; font-size: 12px;
+                     margin: 8px 0; }
+  .suggested-names div { padding: 2px 0; color: #155724; }
+  .output-area { margin-top: 14px; }
+  .output-area iframe { width: 100%; min-height: 400px; border: 1px solid #ddd;
+                        border-radius: 4px; background: #fff; }
+  .inline-code { background: #eee; padding: 1px 5px; border-radius: 3px;
+                 font-family: monospace; font-size: 12px; }
+  details { margin-top: 10px; }
+  details summary { cursor: pointer; font-size: 13px; color: #1a73e8; }
+  .help { background: #e8f0fe; border-left: 3px solid #1a73e8;
+          padding: 10px 12px; border-radius: 0 4px 4px 0;
+          font-size: 13px; margin: 10px 0; }
+  .help code { background: #d2e3fc; padding: 1px 4px; border-radius: 2px; }
+  .flex { display: flex; gap: 12px; flex-wrap: wrap; }
+  .flex > * { min-width: 200px; flex: 1; }
+</style>
+</head>
+<body>
+
+<h1>gdoc2html <small>Google Doc → Clean Responsive HTML</small></h1>
+
+<div id="app">
+  <div class="container">
+    <label>Google Doc URL <span class="opt">(published, bắt buộc)</span></label>
+    <input type="url" id="doc-url" placeholder="https://docs.google.com/document/d/e/.../pub">
+
+    <label>Drive folder URL <span class="opt">(tùy chọn — để auto rehost ảnh)</span></label>
+    <input type="url" id="drive-url" placeholder="https://drive.google.com/drive/folders/...">
+
+    <label>Google API Key <span class="opt">(tùy chọn — cần để list Drive folder, tạo tại console.cloud.google.com)</span></label>
+    <input type="text" id="gapi-key" placeholder="AIza... (optional)">
+
+    <div class="row">
+      <div></div>
+      <button id="fetch-btn" class="primary">▶ Fetch & Render</button>
+      <button id="download-btn" style="display:none">Download HTML</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <label style="margin:0;font-weight:600">Log</label>
+      <span id="status-badge" style="font-size:12px;color:#888"></span>
+    </div>
+    <div id="log">(nhấn Fetch để bắt đầu)</div>
+    <div id="result-area"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const logEl = $('log');
+  let lastResult = null;
+
+  function appendLog(text) {
+    logEl.textContent += text + '\n';
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function setStatus(text, cls='') {
+    $('status-badge').textContent = text;
+    $('status-badge').style.color = cls === 'error' ? '#d93025' : '#1a73e8';
+  }
+
+  function escape(s) {
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function reset() {
+    logEl.textContent = '';
+    $('result-area').innerHTML = '';
+    $('download-btn').style.display = 'none';
+    setStatus('');
+  }
+
+  async function fetchDoc() {
+    const url = $('doc-url').value.trim();
+    if (!url) { alert('Nhập Google Doc URL'); return; }
+
+    reset();
+    const btn = $('fetch-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Đang xử lý...';
+    setStatus('processing...');
+
+    const driveUrl = $('drive-url').value.trim() || null;
+    const gapiKey = $('gapi-key').value.trim() || null;
+
+    try {
+      const r = await fetch('/api/run', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          url,
+          drive_url: driveUrl,
+          gapi_key: gapiKey,
+        }),
+      });
+
+      const j = await r.json();
+
+      // Log
+      if (j.log && j.log.length) {
+        j.log.forEach(l => appendLog(l));
+      }
+
+      if (!r.ok || !j.ok) {
+        $('result-area').innerHTML = `<div class="warn-card">ERROR: ${escape(j.detail || JSON.stringify(j))}</div>`;
+        setStatus('failed', 'error');
+        return;
+      }
+
+      lastResult = j;
+
+      // Build result
+      let html = `<div class="result-card">
+        <div style="margin-bottom:8px"><b>✓ Xong!</b> ${j.out_size.toLocaleString()} bytes</div>
+        <div class="flex">
+          <span class="stat">📄 ${escape(j.doc_id)}</span>
+          <span class="stat">🖼 ${j.imgs_kept} ảnh lh3</span>
+          <span class="stat">🔄 ${j.imgs_replaced}/${j.imgs_total} ảnh rehost</span>
+          ${j.drive_files_count ? `<span class="stat">📁 ${j.drive_files_count} file Drive</span>` : ''}
+        </div>
+      </div>`;
+
+      // Warn if rehost needed but not done
+      if (j.imgs_total > 0 && j.imgs_replaced < j.imgs_total) {
+        if (!driveUrl) {
+          html += `<div class="warn-card">
+            ⚠ Có <b>${j.imgs_total}</b> ảnh cần re-host (URL Google gốc sẽ 403 ngoài domain Google).
+            <br>Thêm Drive folder URL + API key ở form trên rồi chạy lại.
+          </div>`;
+        }
+      }
+
+      // Suggested filenames
+      if (j.suggested_names && j.suggested_names.length > 0) {
+        html += `<details>
+          <summary>📋 Đề xuất tên file cho Drive upload (${j.suggested_names.length} ảnh)</summary>
+          <div class="suggested-names">`;
+        j.suggested_names.forEach(n => {
+          html += `<div>${escape(n)}</div>`;
+        });
+        html += `</div>
+          <div style="font-size:12px;color:#666;margin-top:6px">
+            Upload các file với tên này lên Drive, paste link folder vào ô trên, rồi chạy lại.
+          </div>
+        </details>`;
+      }
+
+      // HTML Preview
+      if (j.html) {
+        html += `<div class="output-area">
+          <details open>
+            <summary>👁 Preview HTML</summary>
+            <iframe id="preview-frame" srcdoc="${escape(j.html)}"></iframe>
+          </details>
+        </div>`;
+        $('download-btn').style.display = '';
+      }
+
+      $('result-area').innerHTML = html;
+      setStatus('done');
+    } catch (err) {
+      appendLog('ERROR: ' + String(err));
+      $('result-area').innerHTML = `<div class="warn-card">ERROR: ${escape(String(err))}</div>`;
+      setStatus('error', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '▶ Fetch & Render';
+    }
+  }
+
+  $('fetch-btn').onclick = fetchDoc;
+
+  $('download-btn').onclick = () => {
+    if (!lastResult || !lastResult.html) return;
+    const blob = new Blob([lastResult.html], {type: 'text/html;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `gdoc2html_${lastResult.short_id || lastResult.doc_id}.html`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  // Enter key in doc-url triggers fetch
+  $('doc-url').onkeydown = e => { if (e.key === 'Enter') fetchDoc(); };
+})();
+</script>
+</body>
+</html>
