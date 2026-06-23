@@ -1,6 +1,10 @@
-"""HTML cleaning, image classification, and responsive CSS injection."""
+"""HTML cleaning, image classification, base64 inlining, and responsive CSS injection."""
 
+import base64
+from io import BytesIO
 from urllib.parse import urlparse
+
+import httpx
 from bs4 import BeautifulSoup
 
 
@@ -65,7 +69,11 @@ KEEP_HOSTS = (
 
 
 def classify_images(soup: BeautifulSoup):
-    """Return (keep, replace) lists of <img> tags."""
+    """Return (keep, replace) lists of <img> tags.
+    
+    'keep' = already on lh3 (works everywhere)
+    'replace' = on docs.google.com (needs referer or base64)
+    """
     keep, replace = [], []
     for img in soup.find_all("img"):
         src = img.get("src", "")
@@ -75,3 +83,61 @@ def classify_images(soup: BeautifulSoup):
         else:
             replace.append(img)
     return keep, replace
+
+
+def inline_images_base64(
+    replace_imgs: list,
+    user_agent: str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+    timeout: int = 60,
+) -> dict:
+    """Download images from Google and replace src with base64 data URIs.
+    
+    Returns: {
+        "inlined": int,          # successfully inlined
+        "failed": int,           # download/encode failures
+        "size_bytes": int,       # total image data size
+        "errors": list[str],     # per-image error messages
+    }
+    """
+    result = {"inlined": 0, "failed": 0, "size_bytes": 0, "errors": []}
+    
+    if not replace_imgs:
+        return result
+
+    with httpx.Client(follow_redirects=True, timeout=timeout) as c:
+        for img in replace_imgs:
+            src = img.get("src", "")
+            if not src:
+                continue
+            
+            ext = "png"
+            for e in ("png", "jpg", "jpeg", "webp", "gif", "svg"):
+                if f".{e}" in src.lower().split("?")[0]:
+                    ext = e
+                    break
+            # Normalize jpeg → jpg for MIME type
+            mime_map = {"jpeg": "jpeg", "jpg": "jpeg", "png": "png", "gif": "gif",
+                       "webp": "webp", "svg": "svg+xml"}
+            mime = mime_map.get(ext, "png")
+
+            try:
+                resp = c.get(src, headers={
+                    "User-Agent": user_agent,
+                    "Referer": "https://docs.google.com/",
+                })
+                if resp.status_code != 200:
+                    result["failed"] += 1
+                    result["errors"].append(f"[{ext}] HTTP {resp.status_code}: {src[:80]}")
+                    continue
+
+                data = resp.content
+                b64 = base64.b64encode(data).decode("ascii")
+                img["src"] = f"data:image/{mime};base64,{b64}"
+                result["inlined"] += 1
+                result["size_bytes"] += len(data)
+                
+            except Exception as e:
+                result["failed"] += 1
+                result["errors"].append(f"[{ext}] {e}: {src[:80]}")
+    
+    return result

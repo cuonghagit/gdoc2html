@@ -7,144 +7,69 @@
 <style>
   * { box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-         max-width: 960px; margin: 20px auto; padding: 0 20px; color: #222;
+         max-width: 800px; margin: 20px auto; padding: 0 20px; color: #222;
          background: #f5f5f5; }
   h1 { margin: 0 0 4px 0; font-size: 22px; }
   h1 small { font-size: 13px; color: #666; font-weight: 400; }
-  .container { background: #fff; border: 1px solid #ddd; border-radius: 8px;
-                padding: 20px 24px; margin-bottom: 16px; }
-  label { display: block; font-size: 13px; color: #555; margin: 10px 0 4px; }
-  label .opt { color: #999; font-weight: 400; }
-  input[type=text], input[type=url] { width: 100%; padding: 8px 10px;
-        border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
-  input:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15); }
-  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
-  button { padding: 8px 20px; border: 1px solid #ccc; background: #fafafa;
-           border-radius: 4px; cursor: pointer; font-size: 13px; white-space: nowrap; }
+  .card { background: #fff; border: 1px solid #ddd; border-radius: 8px;
+          padding: 20px 24px; margin-bottom: 14px; }
+  label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; }
+  .input-row { display: flex; gap: 10px; }
+  .input-row input { flex: 1; padding: 9px 12px; border: 1px solid #ccc;
+                     border-radius: 4px; font-size: 14px; }
+  .input-row input:focus { outline: none; border-color: #1a73e8;
+                           box-shadow: 0 0 0 2px rgba(26,115,232,0.15); }
+  button { padding: 9px 22px; border: 1px solid #ccc; background: #fafafa;
+           border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
   button:hover { background: #eee; }
   button.primary { background: #1a73e8; color: white; border-color: #1a73e8; }
   button.primary:hover { background: #1557b0; }
   button.primary:disabled { background: #99c4f5; border-color: #99c4f5; cursor: not-allowed; }
   button.success { background: #0f9d58; color: white; border-color: #0f9d58; }
-  button.success:hover { background: #0b8043; }
   #log { background: #1e1e1e; color: #d4d4d4; padding: 12px; border-radius: 4px;
          font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px;
-         max-height: 300px; overflow-y: auto; white-space: pre-wrap; margin-top: 8px; }
-  .card { border: 1px solid #ddd; border-radius: 6px; padding: 14px 16px; margin-top: 14px; }
-  .card-success { background: #d4edda; border-color: #c3e6cb; }
-  .card-warn { background: #fff3cd; border-color: #ffeeba; color: #856404; }
-  .card-error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
-  .card-info { background: #e8f0fe; border-color: #d2e3fc; }
+         max-height: 250px; overflow-y: auto; white-space: pre-wrap; margin: 0; }
   .stat { display: inline-block; background: #e8f0fe; border-radius: 4px;
           padding: 3px 10px; margin: 2px; font-size: 12px; }
-  .img-list { background: #f8f8f8; border: 1px solid #eee; border-radius: 4px;
-              padding: 10px; max-height: 300px; overflow-y: auto;
-              font-family: ui-monospace, monospace; font-size: 12px; margin: 8px 0; }
-  .img-list .img-item { padding: 3px 0; display: flex; align-items: center; gap: 8px; }
-  .img-list .img-item .idx { color: #888; min-width: 30px; }
-  .img-list .img-item a { color: #1a73e8; text-decoration: none; }
-  .img-list .img-item a:hover { text-decoration: underline; }
-  .output-area { margin-top: 14px; }
-  .output-area iframe { width: 100%; min-height: 450px; border: 1px solid #ddd;
-                        border-radius: 4px; background: #fff; }
-  details { margin-top: 10px; }
-  details summary { cursor: pointer; font-size: 13px; color: #1a73e8; }
-  .help-box { background: #e8f0fe; border-left: 3px solid #1a73e8;
-              padding: 10px 14px; border-radius: 0 6px 6px 0;
-              font-size: 13px; margin: 10px 0; line-height: 1.6; }
-  .help-box code { background: #d2e3fc; padding: 1px 5px; border-radius: 3px; }
-  .step-indicator { display: flex; gap: 8px; margin-bottom: 16px; }
-  .step-pill { padding: 4px 14px; border-radius: 20px; font-size: 12px;
-               background: #eee; color: #999; }
-  .step-pill.active { background: #1a73e8; color: white; }
-  .step-pill.done { background: #0f9d58; color: white; }
-  .flex { display: flex; gap: 12px; flex-wrap: wrap; }
-  .flex > * { min-width: 150px; flex: 1; }
-  .inline-code { background: #eee; padding: 1px 5px; border-radius: 3px; font-family: monospace; }
-  hr { border: none; border-top: 1px solid #ddd; margin: 16px 0; }
+  .result-box { margin-top: 12px; }
+  .result-box .card { padding: 14px 16px; }
+  .result-box .card.b { background: #d4edda; border-color: #c3e6cb; }
+  .result-box .card.w { background: #fff3cd; border-color: #ffeeba; color: #856404; }
+  .result-box .card.e { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+  .img-icons { margin: 8px 0 0; font-size: 12px; line-height: 1.8; }
+  .error-box { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;
+               padding: 10px 14px; border-radius: 6px; margin-top: 10px; display: none; }
+  @media (max-width:500px) { .input-row { flex-direction: column; } }
 </style>
 </head>
 <body>
 
-<h1>gdoc2html <small>Google Doc → Clean Responsive HTML</small></h1>
+<h1>gdoc2html <small>Google Doc → Clean HTML (base64 inline)</small></h1>
 
-<div id="step-indicator" class="step-indicator">
-  <span class="step-pill" id="step1-pill">1 Fetch doc</span>
-  <span class="step-pill" id="step2-pill">2 Download ảnh</span>
-  <span class="step-pill" id="step3-pill">3 Upload Drive</span>
-  <span class="step-pill" id="step4-pill">4 Render HTML</span>
+<div class="card">
+  <label>Google Doc URL (published)</label>
+  <div class="input-row">
+    <input type="url" id="url-input" placeholder="https://docs.google.com/document/d/e/.../pub" autofocus>
+    <button id="fetch-btn" class="primary">▶ Fetch</button>
+  </div>
+  <div id="error-msg" class="error-box"></div>
 </div>
 
-<div id="app">
-  <!-- ──── STEP 1: Input ──── -->
-  <div class="container">
-    <label>Google Doc URL <span class="opt">(published, bắt buộc)</span></label>
-    <input type="url" id="doc-url" placeholder="https://docs.google.com/document/d/e/.../pub" autofocus>
-
-    <div class="btn-row">
-      <button id="fetch-btn" class="primary">▶ Bước 1: Fetch & xem preview</button>
-    </div>
-    <div id="error-msg" class="card card-error" style="display:none;margin-top:10px"></div>
-  </div>
-
-  <!-- ──── RESULT: images + preview ──── -->
-  <div id="result-area" style="display:none">
-    <div class="container">
-      <div id="fetch-result"></div>
-
-      <div id="drive-section" style="display:none">
-        <hr>
-        <h3 style="margin:0 0 4px 0;font-size:16px">Bước 3 + 4: Rehost ảnh qua Drive</h3>
-        <div class="help-box">
-          <b>Hướng dẫn:</b><br>
-          1. Download ảnh từ danh sách trên (nút <b>Download ZIP</b> hoặc từng cái)<br>
-          2. Upload lên <b>1 folder Drive public</b> (giữ nguyên tên file)<br>
-          3. Paste link folder Drive bên dưới + API key → nhấn Render
-        </div>
-
-        <div class="flex">
-          <div style="flex:2">
-            <label>Drive folder URL <span class="opt">(public, bắt buộc để rehost ảnh)</span></label>
-            <input type="url" id="drive-url" placeholder="https://drive.google.com/drive/folders/...">
-          </div>
-          <div style="flex:1">
-            <label>Google API Key <span class="opt">(<a href="https://console.cloud.google.com/apis/credentials" target="_blank">tạo tại đây</a>)</span></label>
-            <input type="text" id="gapi-key" placeholder="AIza...">
-          </div>
-        </div>
-
-        <div class="btn-row">
-          <button id="render-btn" class="success">▶ Bước 4: Render HTML (rehost ảnh)</button>
-        </div>
-        <div id="render-result" style="margin-top:10px"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ──── LOG ──── -->
-  <div class="container" style="margin-top:0">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-      <label style="margin:0;font-weight:600">Log</label>
-      <span id="status-badge" style="font-size:12px;color:#888"></span>
-    </div>
-    <div id="log">(nhấn Fetch để bắt đầu)</div>
-  </div>
+<div class="card" style="padding:12px 16px">
+  <label style="margin:0 0 4px">Log</label>
+  <div id="log">(paste URL → Fetch)</div>
 </div>
+
+<div id="result-area" style="display:none"></div>
 
 <script>
 (function(){
   const $ = id => document.getElementById(id);
   const logEl = $('log');
-  let lastData = null;  // stored from /api/fetch for re-render
 
   function log(text) {
     logEl.textContent += text + '\n';
     logEl.scrollTop = logEl.scrollHeight;
-  }
-
-  function setStatus(text, cls = '') {
-    $('status-badge').textContent = text;
-    if (cls) $('status-badge').style.color = cls === 'error' ? '#d93025' : '#1a73e8';
   }
 
   function esc(s) {
@@ -152,36 +77,18 @@
     return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
-  function setStepPill(n) {
-    for (let i = 1; i <= 4; i++) {
-      const el = $('step' + i + '-pill');
-      el.className = 'step-pill';
-      if (i < n) el.classList.add('done');
-      else if (i === n) el.classList.add('active');
-    }
-  }
-
-  function showError(msg) {
-    $('error-msg').style.display = '';
-    $('error-msg').textContent = msg;
-  }
-  function hideError() {
-    $('error-msg').style.display = 'none';
-  }
-
-  // ──────────── Bước 1: Fetch ────────────
   $('fetch-btn').onclick = async () => {
-    const url = $('doc-url').value.trim();
-    if (!url) { alert('Nhập Google Doc URL'); return; }
+    const url = $('url-input').value.trim();
+    if (!url) { alert('Nhập URL'); return; }
 
-    hideError();
-    setStepPill(1);
     const btn = $('fetch-btn');
     btn.disabled = true;
-    btn.textContent = '⏳ Đang fetch...';
-    setStatus('fetching...');
+    btn.textContent = '⏳ Fetch & inline ảnh...';
+    $('result-area').style.display = 'none';
+    logEl.textContent = '';
+    $('error-msg').style.display = 'none';
+
     log('[fetch] ' + url);
-    $('drive-section').style.display = 'none';
 
     try {
       const r = await fetch('/api/fetch', {
@@ -192,215 +99,81 @@
       const j = await r.json();
 
       if (!r.ok || !j.ok) {
-        showError(j.detail || JSON.stringify(j));
-        setStatus('failed', 'error');
+        $('error-msg').textContent = j.detail || JSON.stringify(j);
+        $('error-msg').style.display = '';
         return;
       }
 
-      lastData = j;
       (j.log || []).forEach(l => log(l));
 
-      // ── Build result display ──
-      let html = `<div class="card card-success">
-        <div style="margin-bottom:8px"><b>✓ Fetch thành công!</b> ${(j.out_size/1024).toFixed(1)} KB</div>
-        <div class="flex">
-          <span class="stat">📄 ${esc(j.short_id)}</span>
-          <span class="stat">🖼 ${j.imgs_kept} ảnh lh3 (auto)</span>
-          <span class="stat">🔄 ${j.imgs_need_rehost} ảnh cần rehost</span>
-        </div>
-      </div>`;
-
-      // ── Image list (cần rehost) ──
-      if (j.images && j.images.length > 0) {
-        html += `<div class="card card-info" style="margin-top:10px">
-          <b>${j.images.length} ảnh cần rehost:</b>
-          <div class="img-list">`;
-        j.images.forEach(img => {
-          html += `<div class="img-item">
-            <span class="idx">[${img.idx}]</span>
-            <a href="${esc(img.proxy_url)}" download>⬇ ${esc(img.suggested_name)}</a>
-          </div>`;
-        });
-        html += `</div>
-          <div class="btn-row" style="margin:8px 0 0">
-            <button id="download-zip-btn" class="primary">⬇ Download tất cả (ZIP)</button>
+      // Build result card
+      let html = `<div class="result-box">
+        <div class="card b">
+          <b>✓ Xong!</b> HTML ~${j.out_size_kb} KB
+          <div style="margin-top:6px">
+            <span class="stat">📄 ${esc(j.short_id)}</span>
+            <span class="stat">🟢 ${j.imgs_inlined} ảnh inline</span>
+            ${j.imgs_kept_lh3 ? `<span class="stat">🔗 ${j.imgs_kept_lh3} ảnh lh3</span>` : ''}
+            ${j.imgs_failed ? `<span class="stat">⚠ ${j.imgs_failed} fail</span>` : ''}
           </div>
+          <p style="margin:10px 0 0;font-size:13px;color:#555">
+            File HTML tự chứa tất cả ảnh — mở offline vẫn thấy ảnh.
+          </p>
+          <button id="dl-btn" class="success" style="margin-top:10px"
+            onclick="downloadHtml('${esc(j.short_id)}')">
+            ⬇ Download HTML (${j.out_size_kb} KB)
+          </button>
         </div>`;
 
-        // Show drive section
-        $('drive-section').style.display = '';
-        setStepPill(2);
-      }
-
-      // ── HTML Preview ──
-      if (j.html) {
-        html += `<div class="output-area">
-          <details open>
-            <summary>👁 Preview HTML (${(j.out_size/1024).toFixed(1)} KB)</summary>
-            <iframe id="preview-frame" srcdoc="${esc(j.html)}"></iframe>
-          </details>
-          <div class="btn-row">
-            <button id="download-html-btn" class="primary">⬇ Download HTML</button>
-          </div>
+      if (j.imgs_failed > 0) {
+        html += `<div class="card w">
+          ⚠ ${j.imgs_failed} ảnh không tải được (có thể Google block).
+          Một số ảnh sẽ bị thiếu trong HTML.
         </div>`;
       }
 
-      $('fetch-result').innerHTML = html;
+      html += `<div class="card" style="margin-top:10px">
+        <details>
+          <summary style="font-size:13px">👁 Preview HTML (${j.out_size_kb} KB)</summary>
+          <iframe id="preview" srcdoc="${esc(j.html)}"
+            style="width:100%;min-height:400px;border:1px solid #ddd;border-radius:4px;margin-top:8px"></iframe>
+        </details>
+      </div></div>`;
+
+      $('result-area').innerHTML = html;
       $('result-area').style.display = '';
-      setStatus('done');
-
-      // ── Wire download buttons ──
-      setTimeout(() => {
-        const dlZip = document.getElementById('download-zip-btn');
-        if (dlZip) dlZip.onclick = downloadZip;
-
-        const dlHtml = document.getElementById('download-html-btn');
-        if (dlHtml) dlHtml.onclick = downloadHtml;
-      }, 0);
 
     } catch (err) {
-      showError(String(err));
-      setStatus('error', 'error');
+      $('error-msg').textContent = String(err);
+      $('error-msg').style.display = '';
+      log('ERROR: ' + String(err));
     } finally {
       btn.disabled = false;
-      btn.textContent = '▶ Bước 1: Fetch & xem preview';
+      btn.textContent = '▶ Fetch';
     }
   };
 
-  // ──────────── Download ZIP ────────────
-  async function downloadZip() {
-    const url = $('doc-url').value.trim();
-    if (!url) return;
-    try {
-      const r = await fetch('/api/download-all', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({url}),
-      });
-      if (!r.ok) {
-        const j = await r.json();
-        alert('Lỗi: ' + (j.detail || 'unknown'));
-        return;
-      }
-      const blob = await r.blob();
+  function downloadHtml(shortId) {
+    // Extract HTML from the iframe's srcdoc attribute
+    const iframe = document.getElementById('preview');
+    if (iframe) {
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      // extract filename from content-disposition
-      const cd = r.headers.get('content-disposition') || '';
-      const fn = cd.match(/filename="?(.+?)"?$/);
-      a.download = fn ? fn[1] : 'images.zip';
+      a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(iframe.srcdoc);
+      a.download = `gdoc2html_${shortId || 'output'}.html`;
       a.click();
-      URL.revokeObjectURL(a.href);
-      log('[zip] Downloaded ' + blob.size + ' bytes');
-    } catch (err) {
-      alert('Lỗi download ZIP: ' + err);
+    } else {
+      // Fallback: re-fetch
+      alert('Load lại trang và Fetch lại để download');
     }
   }
 
-  // ──────────── Download HTML ────────────
-  function downloadHtml() {
-    if (!lastData || !lastData.html) return;
-    const blob = new Blob([lastData.html], {type: 'text/html;charset=utf-8'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `gdoc2html_${lastData.short_id || 'output'}.html`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-    log('[download] HTML saved');
-  }
-
-  // ──────────── Bước 4: Render ────────────
-  $('render-btn').onclick = async () => {
-    const url = $('doc-url').value.trim();
-    const driveUrl = $('drive-url').value.trim();
-    const gapiKey = $('gapi-key').value.trim();
-
-    if (!url) { alert('Thiếu URL doc'); return; }
-    if (!driveUrl) { alert('Nhập Drive folder URL'); return; }
-
-    setStepPill(4);
-    const btn = $('render-btn');
-    btn.disabled = true;
-    btn.textContent = '⏳ Đang render...';
-    setStatus('rendering...');
-    log('[render] drive=' + driveUrl);
-
-    try {
-      const r = await fetch('/api/render', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({url, drive_url: driveUrl, gapi_key: gapiKey || null}),
-      });
-      const j = await r.json();
-
-      if (!r.ok || !j.ok) {
-        $('render-result').innerHTML =
-          `<div class="card card-error">ERROR: ${esc(j.detail || JSON.stringify(j))}</div>`;
-        setStatus('failed', 'error');
-        return;
-      }
-
-      (j.log || []).forEach(l => log(l));
-
-      let html = `<div class="card card-success">
-        <b>✓ Render xong!</b> ${(j.out_size/1024).toFixed(1)} KB<br>
-        <span class="stat">🖼 ${j.imgs_replaced}/${j.imgs_total} ảnh rehost</span>
-        ${j.drive_files_count ? `<span class="stat">📁 ${j.drive_files_count} file Drive</span>` : ''}
-      </div>`;
-
-      if (j.imgs_total > 0 && j.imgs_replaced < j.imgs_total) {
-        html += `<div class="card card-warn">
-          ⚠ Chỉ replace ${j.imgs_replaced}/${j.imgs_total} ảnh.
-          Kiểm tra Drive folder có đủ file và đúng tên không.
-        </div>`;
-      }
-
-      if (j.html) {
-        html += `<div class="output-area">
-          <details open>
-            <summary>👁 HTML hoàn chỉnh</summary>
-            <iframe srcdoc="${esc(j.html)}"></iframe>
-          </details>
-          <div class="btn-row">
-            <button id="final-download-btn" class="success">⬇ Download HTML (rehosted)</button>
-          </div>
-        </div>`;
-      }
-
-      $('render-result').innerHTML = html;
-      setStatus('done');
-
-      setTimeout(() => {
-        const btn2 = document.getElementById('final-download-btn');
-        if (btn2) {
-          btn2.onclick = () => {
-            if (!j.html) return;
-            const blob = new Blob([j.html], {type: 'text/html;charset=utf-8'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `gdoc2html_${j.short_id || 'output'}_rehosted.html`;
-            a.click();
-            URL.revokeObjectURL(a.href);
-          };
-        }
-      }, 0);
-
-    } catch (err) {
-      $('render-result').innerHTML =
-        `<div class="card card-error">ERROR: ${esc(String(err))}</div>`;
-      setStatus('error', 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '▶ Bước 4: Render HTML (rehost ảnh)';
-    }
-  };
-
-  // Enter key trigger
-  $('doc-url').onkeydown = e => { if (e.key === 'Enter') $('fetch-btn').click(); };
-
-  // Initial state
-  setStepPill(1);
+  // Enter key
+  $('url-input').onkeydown = e => { if (e.key === 'Enter') $('fetch-btn').click(); };
 })();
 </script>
+
+<footer style="text-align:center;font-size:11px;color:#aaa;margin:30px 0">
+  Ảnh được inline base64 — không cần Drive, không cần API key
+</footer>
 </body>
 </html>
